@@ -1,5 +1,6 @@
 # Koa Validation
 
+This is a fork of Koa Validation. I add koa2 support to it.
 Koa Validation is a validation middleware for Koa. Using Koa Validation, you can validate
 url params, url queries, request bodies, headers as well as files. The module also allows for nested
 queries and nested jsons to be validated. The plugin uses generators and hence syncronous database validations
@@ -15,22 +16,23 @@ The module can also be extended to add custom rules, filters and actions based o
 
 ```js
 
-var app = require('koa')();
-var router = (new require('koa-router'))();
-var koaBody = require('koa-better-body');
+const Koa = require('koa');
+const Router = require('koa-router');
+const koaBody = require('koa-better-body');
+
+const app = new Koa();
+const router = new Router();
 
 require('koa-qs')(app, 'extended');
 
-var validate = require('koa-validation');
+const validate = require('@byted/koa-validation');
 
 app.use(koaBody({
     'multipart': true
 }));
-
 app.use(validate());
-
-router.post('/', function *(){
-    yield this.validateBody(
+router.post('/', async function(ctx, next){
+    await ctx.validateBody(
         {
             name: 'required|minLength:4',
             girlfiend: 'requiredIf:age,25',
@@ -80,14 +82,16 @@ router.post('/', function *(){
         }
     )
 
-    if (this.validationErrors) {
-        this.status = 422;
-        this.body = this.validationErrors;
+    if (ctx.validationErrors) {
+        ctx.status = 422;
+        ctx.body = ctx.validationErrors;
     } else {
-        this.status = 200;
-        this.body = { success: true }
+        ctx.status = 200;
+        ctx.body = { success: true }
     }
 });
+
+app.use(router.routes()).use(router.allowedMethods());
 
 ```
 
@@ -95,22 +99,23 @@ router.post('/', function *(){
 
 ```js
 
-var app = require('koa')();
-var router = (new require('koa-router'))();
-var koaBody = require('koa-better-body');
+const Koa = require('koa');
+const Router = require('koa-router');
+const koaBody = require('koa-better-body');
+
+const app = new Koa();
+const router = new Router();
 
 require('koa-qs')(app, 'extended');
 
-var validate = require('koa-validation');
+const validate = require('@byted/koa-validation');
 
 app.use(koaBody({
     'multipart': true
 }));
-
 app.use(validate());
-
-router.post('/files', function *(){
-    yield this.validateFiles({
+router.post('/files', async function(ctx, next){
+    await ctx.validateFiles({
         'jsFile':'required|size:min,10kb,max,20kb',
         'imgFile': 'required|image',
         'imgFile1': 'mime:jpg',
@@ -120,7 +125,7 @@ router.post('/files', function *(){
         jsFile: {
             action: 'move',
             args: __dirname + '/../files/tmp/rules.js',
-            callback: function *(validator, file, destination){
+            callback: async function(validator, file, destination){
                 validator.addError(jsFile, 'action', 'move', 'Just checking if the callback action works!!')
             }
         },
@@ -135,12 +140,12 @@ router.post('/files', function *(){
         ]
     });
 
-    if (this.validationErrors) {
-        this.status = 422;
-        this.body = this.validationErrors;
+    if (ctx.validationErrors) {
+        ctx.status = 422;
+        ctx.body = ctx.validationErrors;
     } else {
-        this.status = 200;
-        this.body = { success: true }
+        ctx.status = 200;
+        ctx.body = { success: true }
     }
 });
 
