@@ -1,7 +1,6 @@
-var request = require('supertest')
-  , app = require('./app/app')
-  , fs = require('co-fs-extra')
-  , co = require('co');
+const request = require('supertest');
+const app = require('./app/app');
+const fs = require('fs-extra');
 
 describe('Koa request file validation', function(){
     it('should throw the required rule errors when conditions don\'t match', function(done){
@@ -72,14 +71,14 @@ describe('Koa request file validation', function(){
         request(app.listen()).post('/deleteOnFail')
         .attach('imgFile', __dirname + '/../lib/rules.js')
         .attach('jsFile', __dirname + '/files/redpanda.jpg')
-        .end(function (err, res){
-            res.statusCode.should.equal(422);
-            res.body.should.be.an.Array;
-            (co.wrap(function *(){
-                for(var i = 0; i < res.body.length; ++i){
-                    (yield fs.exists(res.body[i])).should.equal(false);
+        .end(function (err, res) {
+            ((async function() {
+                res.statusCode.should.equal(422);
+                res.body.should.be.an.Array;                
+                for(var i = 0; i < res.body.length; i++){
+                    (await fs.exists(res.body[i])).should.equal(false);
                 }
-            })()).then(done, done);
+            })()).then(done, done);                    
         });
     });
 
@@ -88,27 +87,22 @@ describe('Koa request file validation', function(){
         .attach('jsFile', __dirname + '/../lib/rules.js')
         .attach('imgFile', __dirname + '/files/redpanda.jpg')
         .end(function(err, res){
-            //console.log(res.body);
-            res.statusCode.should.equal(422);
-            res.body.should.be.an.Object;
-            res.body.should.have.property('tmpFiles');
-            res.body.should.have.property('errors');
-            res.body.tmpFiles.should.have.property('jsFile');
-            res.body.tmpFiles.should.have.property('imgFile');
+            ((async function() {
+                res.statusCode.should.equal(422);
+                res.body.should.be.an.Object;
+                res.body.should.have.property('tmpFiles');
+                res.body.should.have.property('errors');
+                res.body.tmpFiles.should.have.property('jsFile');
+                res.body.tmpFiles.should.have.property('imgFile');
 
-            (co.wrap(function *(){
-                //console.log(yield fs.exists( __dirname + '/app/tmp/rules.js'));
-                (yield fs.exists( __dirname + '/files/tmp/rules.js')).should.equal(true);
-                (yield fs.exists(__dirname + '/files/tmp/panda.jpg')).should.equal(true);
-
-                yield fs.remove(__dirname + '/app/tmp');
-            })()).then(done, done)
+                (await fs.exists( __dirname + '/files/tmp/rules.js')).should.equal(true);
+                (await fs.exists(__dirname + '/files/tmp/panda.jpg')).should.equal(true);
+                await fs.remove(__dirname + '/app/tmp');
+            })()).then(done, done);   
         });
     });
 
-    after(function() {
-        (co.wrap(function *(){
-            yield fs.remove(__dirname + '/files/tmp');
-        })())
+    after(async function() {
+        await fs.remove(__dirname + '/files/tmp');
     });
 });

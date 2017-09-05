@@ -1,17 +1,17 @@
 module.exports = function(app, router){
 
-    router.post('/params/:username/post/:postId', function *(){
-        yield this.validateParams({
+    router.post('/params/:username/post/:postId', async function(ctx, next){
+        await ctx.validateParams({
             'username': 'alphaDash|between:6,15',
             'postId': 'numeric|digitsBetween:10000,99999'
         });
 
-        if(this.validationErrors){
-            this.status = 422;
-            this.body = this.validationErrors;
+        if(ctx.validationErrors){
+            ctx.status = 422;
+            ctx.body = ctx.validationErrors;
         }else{
-            this.status = 200;
-            this.body = { success: true };
+            ctx.status = 200;
+            ctx.body = { success: true };
         }
     });
 

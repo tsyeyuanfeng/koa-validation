@@ -1,7 +1,8 @@
+const fs = require('fs-extra');
 module.exports = function(app, router){
 
-    router.post('/files', function *(){
-        yield this.validateFiles({
+    router.post('/files', async function(ctx, next){
+        await ctx.validateFiles({
             'jsFile':'required|size:min,10kb,max,20kb',
             'imgFile': 'required|image',
             'imgFile1': 'mime:jpg',
@@ -9,44 +10,43 @@ module.exports = function(app, router){
             'pkgFile': 'name:package'
         });
 
-        if(this.validationErrors){
-            this.status = 422;
-            this.body = this.validationErrors;
+        if(ctx.validationErrors){
+            ctx.status = 422;
+            ctx.body = ctx.validationErrors;
         }else{
-            this.status = 200;
-            this.body = { success: true }
+            ctx.status = 200;
+            ctx.body = { success: true }
         }
     });
 
-    router.post('/deleteOnFail', function *(){
-        yield this.validateFiles({
+    router.post('/deleteOnFail', async function(ctx, next){
+        await ctx.validateFiles({
             'jsFile':'required|size:min,10kb,max,20kb',
             'imgFile': 'required|image'
         }, true);
-
-        if(this.validationErrors){
-            this.status = 422;
+        
+        if(ctx.validationErrors){
+            ctx.status = 422;
             var tmpfiles = []
-            for (var f in this.request.body.files){
-                tmpfiles.push(this.request.body.files[f].path);
+            for (var f in ctx.request.body.files){
+                tmpfiles.push(ctx.request.body.files[f].path);
             }
-
-            this.body = tmpfiles;
+            ctx.body = tmpfiles;
         }else{
-            this.status = 200;
-            this.body = { success: true }
+            ctx.status = 200;
+            ctx.body = { success: true }
         }
     });
 
-    router.post('/fileActions', function *(){
-        yield this.validateFiles({
+    router.post('/fileActions', async function(ctx, next){
+        await ctx.validateFiles({
             'jsFile':'required|size:min,10kb,max,20kb',
             'imgFile': 'required|image',
         },true, {}, {
             jsFile: {
                 action: 'move',
                 args: __dirname + '/../files/tmp/rules.js',
-                callback: function *(validator, file, destination){
+                callback: async function(validator, file, destination){
                     validator.addError(jsFile, 'action', 'move', 'Just checking if the callback action works!!')
                 }
             },
@@ -61,19 +61,19 @@ module.exports = function(app, router){
             ]
         });
 
-        if(this.validationErrors){
-            this.status = 422;
+        if(ctx.validationErrors){
+            ctx.status = 422;
             var tmpfiles = {}
-            for (var f in this.request.body.files){
-                tmpfiles[f] = this.request.body.files[f].path;
+            for (var f in ctx.request.body.files){
+                tmpfiles[f] = ctx.request.body.files[f].path;
             }
-            this.body = {
+            ctx.body = {
                 tmpFiles: tmpfiles,
-                errors: this.validationErrors
+                errors: ctx.validationErrors
             };
         }else{
-            this.status = 200;
-            this.body = { success: true }
+            ctx.status = 200;
+            ctx.body = { success: true }
         }
     });
 

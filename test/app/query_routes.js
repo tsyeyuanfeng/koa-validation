@@ -1,7 +1,7 @@
 module.exports = function(app, router){
 
-    router.get('/', function *(){
-        yield this.validateQueries(
+    router.get('/', async function(ctx,  next){
+        await ctx.validateQueries(
             {
                 name: 'required|minLength:4',
                 girlfiend: 'requiredIf:age,25',
@@ -47,17 +47,17 @@ module.exports = function(app, router){
             }
         );
 
-        if(this.validationErrors){
-            this.status = 422;
-            this.body = this.validationErrors;
+        if(ctx.validationErrors){
+            ctx.status = 422;
+            ctx.body = ctx.validationErrors;
         }else{
-            this.status = 200;
-            this.body = { success: true }
+            ctx.status = 200;
+            ctx.body = { success: true }
         }
     });
 
-    router.get('/filters/before', function *(){
-        yield this.validateQueries({},{},{
+    router.get('/filters/before', async function(ctx, next){
+        await ctx.validateQueries({},{},{
             before: {
                 name: 'lowercase',
                 nickname: 'uppercase',
@@ -76,11 +76,11 @@ module.exports = function(app, router){
             }
         });
 
-        this.body = this.query;
+        ctx.body = ctx.query;
     });
 
-    router.get('/filters/after', function *(){
-        yield this.validateQueries({},{},{
+    router.get('/filters/after', async function(ctx, next){
+        await ctx.validateQueries({},{},{
             after: {
                 name: 'lowercase',
                 nickname: 'uppercase',
@@ -99,7 +99,7 @@ module.exports = function(app, router){
             }
         });
 
-        this.body = this.query;
+        ctx.body = ctx.query;
     });
 
     app.use(router.routes()).use(router.allowedMethods());

@@ -26,6 +26,8 @@
   "license": "ISC",
   "dependencies": {
     "co-fs-extra": "^1.1.0",
+    "fs-extra": "^4.0.1",
+    "koa-better-body": "^1.0.17",
     "mime-types": "^2.1.7",
     "moment-timezone": "^0.4.1",
     "validator": "^4.0.5"
@@ -33,10 +35,9 @@
   "devDependencies": {
     "co": "^4.6.0",
     "istanbul-harmony": "^0.3.16",
-    "koa": "^1.0.0",
-    "koa-better-body": "^1.0.17",
+    "koa": "^2.3.0",
     "koa-qs": "^2.0.0",
-    "koa-router": "^5.2.1",
+    "koa-router": "^7.2.1",
     "mocha": "^2.3.3",
     "should": "^7.1.1",
     "supertest": "^1.1.0"

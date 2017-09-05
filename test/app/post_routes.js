@@ -1,7 +1,7 @@
 module.exports = function(app, router){
 
-    router.put('/', function *(){
-        yield this.validateBody(
+    router.put('/', async function(ctx, next){
+        await ctx.validateBody(
             {
                 name: 'required|minLength:4',
                 girlfiend: 'requiredIf:age,25',
@@ -47,17 +47,17 @@ module.exports = function(app, router){
             }
         )
 
-        if(this.validationErrors){
-            this.status = 422;
-            this.body = this.validationErrors;
+        if(ctx.validationErrors){
+            ctx.status = 422;
+            ctx.body = ctx.validationErrors;
         }else{
-            this.status = 200;
-            this.body = { success: true }
+            ctx.status = 200;
+            ctx.body = { success: true }
         }
     });
 
-    router.put('/filters/before', function *(){
-        yield this.validateBody({},{},{
+    router.put('/filters/before', async function(ctx, next){
+        await ctx.validateBody({},{},{
             before: {
                 name: 'lowercase',
                 nickname: 'uppercase',
@@ -76,11 +76,11 @@ module.exports = function(app, router){
             }
         })
 
-        this.body = this.request.body.fields || this.request.body || {};
+        ctx.body = ctx.request.body.fields || ctx.request.body || {};
     });
 
-    router.put('/filters/after', function *(){
-        yield this.validateBody({},{},{
+    router.put('/filters/after', async function(ctx, next){
+        await ctx.validateBody({},{},{
             after: {
                 name: 'lowercase',
                 nickname: 'uppercase',
@@ -99,7 +99,7 @@ module.exports = function(app, router){
             }
         });
 
-        this.body = this.request.body.fields || this.request.body || {};
+        ctx.body = ctx.request.body.fields || ctx.request.body || {};
     });
 
     app.use(router.routes()).use(router.allowedMethods());

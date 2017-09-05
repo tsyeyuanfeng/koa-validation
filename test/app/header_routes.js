@@ -1,7 +1,7 @@
 module.exports = function(app, router){
 
-    router.get('/headers', function *(){
-        yield this.validateHeaders(
+    router.get('/headers', async function(ctx, next){
+        await ctx.validateHeaders(
             {
                 'content-type': 'required|equals:application/json',
                 'x-authorization': 'required|between:20,30',
@@ -15,12 +15,12 @@ module.exports = function(app, router){
             }
         );
 
-        if(this.validationErrors){
-            this.status = 422;
-            this.body = this.validationErrors;
+        if(ctx.validationErrors){
+            ctx.status = 422;
+            ctx.body = ctx.validationErrors;
         }else{
-            this.status = 200;
-            this.body = { success: true }
+            ctx.status = 200;
+            ctx.body = { success: true }
         }
     });
 
